@@ -1,28 +1,46 @@
+/* ===================================================================
+   OBSIDIAN RESONANCE — Scroll-Driven 3D Experience
+   =================================================================== */
+
+/* --- Reset & Variables --- */
 :root {
   color-scheme: dark;
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  background: #090909;
-  color: #f5efe9;
+  --copper: #c9845e;
+  --copper-light: #ffb27a;
+  --copper-hot: #ff9b58;
+  --text: #f5efe9;
+  --text-dim: rgba(245, 239, 233, 0.58);
+  --text-mid: rgba(245, 239, 233, 0.74);
+  --bg: #090909;
+  --glass: rgba(12, 12, 12, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles smoothing */
 }
 
 html,
 body {
   width: 100%;
   min-height: 100%;
-  margin: 0;
+  overflow-x: hidden;
 }
 
 body {
-  overflow-x: hidden;
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035), transparent 1px) 0 0 / 100% 100%,
-    linear-gradient(120deg, #070707 0%, #111111 54%, #070707 100%);
+  background: linear-gradient(120deg, #070707 0%, #0e0e0e 54%, #070707 100%);
 }
 
 a {
@@ -30,195 +48,418 @@ a {
   text-decoration: none;
 }
 
-.shell {
+/* --- 3D Canvas (fixed background) --- */
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* --- Scroll Container (overlays the canvas) --- */
+#scroll-container {
+  position: relative;
+  z-index: 2;
+  pointer-events: none; /* let pointer events fall through to body for 3D */
+}
+
+#scroll-container * {
+  pointer-events: auto;
+}
+
+/* ===================================================================
+   SECTIONS — shared
+   =================================================================== */
+.section {
+  position: relative;
+  width: 100%;
+}
+
+/* ===================================================================
+   HERO
+   =================================================================== */
+.section--hero {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 34px 9%;
-  position: relative;
+  padding: 34px 8% 0;
 }
 
 .nav {
   align-self: flex-end;
   display: flex;
   gap: 42px;
-  font-size: 15px;
+  font-size: 14px;
   text-transform: uppercase;
-  color: rgba(245, 239, 233, 0.74);
-  z-index: 2;
+  letter-spacing: 0.08em;
+  color: var(--text-mid);
 }
 
 .nav a {
-  transition: color 180ms ease;
+  transition: color 200ms ease;
 }
-
 .nav a:hover {
-  color: #ff9b58;
+  color: var(--copper-hot);
 }
 
-.hero {
+.hero-layout {
   flex: 1;
-  min-height: 660px;
   display: grid;
-  grid-template-columns: minmax(390px, 0.82fr) minmax(500px, 1.18fr);
+  grid-template-columns: 0.48fr 0.52fr;
   align-items: center;
-  gap: 36px;
+  min-height: 660px;
+  gap: 40px;
 }
 
-.copy {
-  z-index: 2;
-  max-width: 740px;
+.hero-copy {
+  max-width: 680px;
+}
+
+.hero-scene-space {
+  /* transparent — 3D shows through */
+  pointer-events: none;
 }
 
 .eyebrow {
-  margin: 0 0 26px;
-  font-size: 17px;
+  margin: 0 0 24px;
+  font-size: 16px;
   text-transform: uppercase;
-  color: rgba(245, 239, 233, 0.78);
+  letter-spacing: 0.1em;
+  color: var(--text-mid);
 }
 
 h1 {
-  margin: 0;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 76px;
+  font-size: clamp(46px, 5.4vw, 78px);
   line-height: 0.96;
   font-weight: 500;
   color: #f8f4ed;
 }
 
-h1 em {
-  color: #c9845e;
+h1 em,
+h2 em,
+.final-heading em {
+  color: var(--copper);
   font-style: italic;
   font-weight: 500;
 }
 
 .lede {
-  max-width: 580px;
-  margin: 34px 0 0;
-  font-size: 20px;
+  max-width: 540px;
+  margin: 30px 0 0;
+  font-size: 19px;
   line-height: 1.55;
-  color: rgba(245, 239, 233, 0.68);
+  color: var(--text-dim);
 }
 
-.scene-panel {
-  min-height: 620px;
-  height: 72vh;
-  max-height: 820px;
-  position: relative;
-}
-
-#scene {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.scene-panel::before {
-  content: "";
-  position: absolute;
-  inset: 4% 2% 2%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 50%;
+/* ===================================================================
+   ZOOM SPACER
+   =================================================================== */
+.section--zoom {
+  height: 150vh;
   pointer-events: none;
 }
 
-.loader {
-  display: none;
+/* ===================================================================
+   PROJECT SECTION
+   =================================================================== */
+.section--project {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 80px 8%;
 }
 
-.loader.is-hidden {
-  opacity: 0;
-  visibility: hidden;
+.project-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  width: 100%;
+  align-items: center;
 }
 
-.ticker {
-  border-top: 1px solid rgba(255, 255, 255, 0.16);
+.project-num {
+  display: inline-block;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--copper);
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.project-name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(36px, 3.6vw, 54px);
+  font-weight: 500;
+  line-height: 1.08;
+  margin-bottom: 18px;
+  color: var(--text);
+}
+
+.project-desc {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  max-width: 420px;
+  margin-bottom: 26px;
+}
+
+.project-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.project-tags span {
+  padding: 5px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  font-size: 12px;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* --- Project Card --- */
+.project-info {
+  position: relative;
+  z-index: 3;
+}
+
+.project-card-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.project-card {
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 16 / 11;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-badge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--copper);
+  margin-bottom: 14px;
+}
+
+.card-preview {
+  flex: 1;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-preview--1 {
+  background: linear-gradient(
+    135deg,
+    rgba(201, 132, 94, 0.12) 0%,
+    rgba(20, 18, 16, 0.7) 100%
+  );
+}
+.card-preview--2 {
+  background: linear-gradient(
+    135deg,
+    rgba(100, 140, 200, 0.12) 0%,
+    rgba(14, 18, 26, 0.7) 100%
+  );
+}
+.card-preview--3 {
+  background: linear-gradient(
+    135deg,
+    rgba(140, 200, 100, 0.12) 0%,
+    rgba(14, 26, 18, 0.7) 100%
+  );
+}
+
+/* ===================================================================
+   HORIZONTAL SCROLL
+   =================================================================== */
+.section--hscroll {
+  overflow: hidden;
+}
+
+.hscroll-track {
+  display: flex;
+  width: fit-content;
+  will-change: transform;
+}
+
+.hscroll-panel {
+  width: 100vw;
+  height: 100vh;
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 0 8%;
+  gap: 60px;
+}
+
+.hscroll-panel-info {
+  position: relative;
+  z-index: 3;
+}
+
+.hscroll-panel-card {
+  display: flex;
+  justify-content: center;
+}
+
+/* ===================================================================
+   FINAL SECTION
+   =================================================================== */
+.section--final {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 80px 8%;
+}
+
+.final-layout {
+  display: grid;
+  grid-template-columns: 0.48fr 0.52fr;
+  gap: 60px;
+  width: 100%;
+  align-items: center;
+}
+
+.final-copy {
+  max-width: 620px;
+}
+
+.final-heading {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(38px, 4.2vw, 64px);
+  font-weight: 500;
+  line-height: 1.02;
+  margin-bottom: 22px;
+  color: var(--text);
+}
+
+.final-scene-space {
+  pointer-events: none;
+}
+
+/* ===================================================================
+   FOOTER
+   =================================================================== */
+.footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0 8%;
+}
+
+.footer-inner {
   min-height: 70px;
   display: flex;
   align-items: center;
   gap: 18px;
-  color: rgba(245, 239, 233, 0.58);
-  font-size: 17px;
+  color: var(--text-dim);
+  font-size: 16px;
 }
 
-.ticker strong {
-  color: rgba(245, 239, 233, 0.92);
+.footer-inner strong {
+  color: rgba(245, 239, 233, 0.88);
   font-weight: 500;
 }
 
+.footer-sep {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ===================================================================
+   RESPONSIVE
+   =================================================================== */
 @media (max-width: 1060px) {
-  .shell {
-    padding: 28px 6%;
+  .section--hero {
+    padding: 28px 6% 0;
   }
-
   .nav {
-    gap: 24px;
-    font-size: 14px;
+    gap: 22px;
+    font-size: 13px;
   }
-
-  .hero {
+  .hero-layout {
     grid-template-columns: 1fr;
-    min-height: 0;
-    padding-top: 64px;
+    min-height: auto;
+    padding-top: 60px;
   }
-
-  .copy {
-    max-width: 780px;
+  .hero-scene-space {
+    display: none;
   }
-
   h1 {
-    font-size: 58px;
+    font-size: 56px;
   }
-
-  .scene-panel {
-    height: 620px;
-    min-height: 540px;
+  .project-layout,
+  .final-layout {
+    grid-template-columns: 1fr;
+  }
+  .hscroll-panel {
+    grid-template-columns: 1fr;
+    padding: 0 6%;
+  }
+  .project-name {
+    font-size: 42px;
+  }
+  .final-heading {
+    font-size: 46px;
   }
 }
 
 @media (max-width: 640px) {
-  .shell {
-    padding: 24px 20px;
+  .section--hero {
+    padding: 22px 20px 0;
   }
-
   .nav {
     width: 100%;
     justify-content: flex-start;
     flex-wrap: wrap;
-    gap: 12px 18px;
+    gap: 10px 16px;
     font-size: 11px;
   }
-
-  .hero {
-    padding-top: 52px;
-    gap: 18px;
-  }
-
   .eyebrow {
     font-size: 13px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
-
   h1 {
-    font-size: 46px;
+    font-size: 42px;
   }
-
   .lede {
-    max-width: 340px;
     font-size: 16px;
     line-height: 1.45;
-    margin-top: 26px;
+    margin-top: 22px;
+    max-width: 320px;
   }
-
-  .scene-panel {
-    min-height: 420px;
-    height: 500px;
+  .section--project,
+  .section--final {
+    padding: 60px 20px;
   }
-
-  .ticker {
+  .hscroll-panel {
+    padding: 0 20px;
+  }
+  .footer {
+    padding: 0 20px;
+  }
+  .footer-inner {
     flex-wrap: wrap;
     font-size: 14px;
-    gap: 12px;
-    padding: 18px 0 0;
+    gap: 10px;
+    padding: 16px 0;
   }
 }

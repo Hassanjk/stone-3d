@@ -6,42 +6,131 @@
     <title>Obsidian Resonance</title>
   </head>
   <body>
-    <main class="shell">
-      <nav class="nav" aria-label="Primary">
-        <a href="#work">Work</a>
-        <a href="#about">About</a>
-        <a href="#approach">Approach</a>
-        <a href="#journal">Journal</a>
-        <a href="#contact">Contact</a>
-      </nav>
+    <!-- 3D Canvas — fixed full-screen background -->
+    <canvas id="scene"></canvas>
 
-      <section class="hero" aria-label="Obsidian resonance scene">
-        <div class="copy">
-          <p class="eyebrow">Digital Artifact</p>
-          <h1>
-            Crafting <em>mineral</em><br />
-            experiences that<br />
-            <em>resonate.</em>
-          </h1>
-          <p class="lede">
-            Dark polished stone, copper light, and a levitating product moment built for a web-native scene.
-          </p>
-        </div>
+    <!-- HTML overlay content that scrolls over the 3D scene -->
+    <div id="scroll-container">
 
-        <div class="scene-panel" aria-label="Interactive 3D scene">
-          <canvas id="scene"></canvas>
+      <!-- SECTION 1: Hero -->
+      <section class="section section--hero" data-section="hero">
+        <nav class="nav" aria-label="Primary">
+          <a href="#work">Work</a>
+          <a href="#about">About</a>
+          <a href="#approach">Approach</a>
+          <a href="#journal">Journal</a>
+          <a href="#contact">Contact</a>
+        </nav>
+        <div class="hero-layout">
+          <div class="hero-copy" data-animate="hero-text">
+            <p class="eyebrow">Digital Artifact</p>
+            <h1>
+              Crafting <em>mineral</em><br />
+              experiences that<br />
+              <em>resonate.</em>
+            </h1>
+            <p class="lede">
+              Dark polished stone, copper light, and a levitating product moment built for a web-native scene.
+            </p>
+          </div>
+          <!-- Right side is transparent — 3D scene shows through -->
+          <div class="hero-scene-space"></div>
         </div>
       </section>
 
-      <footer class="ticker" id="work">
-        <span>01</span>
-        <strong>Warm Base</strong>
-        <span>Embedded GLB</span>
-        <span>02</span>
-        <strong>Stone Object</strong>
-        <span>Three.js Motion</span>
+      <!-- SECTION 2: Zoom spacer (scroll distance for zoom effect) -->
+      <section class="section section--zoom" data-section="zoom"></section>
+
+      <!-- SECTION 3: Project 01 -->
+      <section class="section section--project" data-section="project1">
+        <div class="project-layout">
+          <div class="project-info" data-animate="project1-text">
+            <span class="project-num">01</span>
+            <h2 class="project-name">Minimal Store</h2>
+            <p class="project-desc">A refined e-commerce experience built with restraint. Clean typography, generous whitespace, and purposeful motion.</p>
+            <div class="project-tags">
+              <span>E-Commerce</span>
+              <span>Three.js</span>
+              <span>WebGL</span>
+            </div>
+          </div>
+          <div class="project-card-wrap" data-animate="project1-card">
+            <div class="project-card">
+              <div class="card-badge">Featured Project</div>
+              <div class="card-preview card-preview--1"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: Horizontal scroll -->
+      <section class="section section--hscroll" data-section="horizontal">
+        <div class="hscroll-track">
+          <div class="hscroll-panel">
+            <div class="hscroll-panel-info" data-animate="hp1">
+              <span class="project-num">01</span>
+              <h2 class="project-name">Minimal Store</h2>
+              <p class="project-desc">Clean commerce with purpose.</p>
+            </div>
+            <div class="hscroll-panel-card">
+              <div class="project-card"><div class="card-badge">E-Commerce</div><div class="card-preview card-preview--1"></div></div>
+            </div>
+          </div>
+          <div class="hscroll-panel">
+            <div class="hscroll-panel-info" data-animate="hp2">
+              <span class="project-num">02</span>
+              <h2 class="project-name">Velox</h2>
+              <p class="project-desc">Speed meets elegance in motion.</p>
+            </div>
+            <div class="hscroll-panel-card">
+              <div class="project-card"><div class="card-badge">Dashboard</div><div class="card-preview card-preview--2"></div></div>
+            </div>
+          </div>
+          <div class="hscroll-panel">
+            <div class="hscroll-panel-info" data-animate="hp3">
+              <span class="project-num">03</span>
+              <h2 class="project-name">Aether</h2>
+              <p class="project-desc">Spatial interfaces, reimagined.</p>
+            </div>
+            <div class="hscroll-panel-card">
+              <div class="project-card"><div class="card-badge">Spatial UI</div><div class="card-preview card-preview--3"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: Final / Philosophy -->
+      <section class="section section--final" data-section="final">
+        <div class="final-layout">
+          <div class="final-copy" data-animate="final-text">
+            <p class="eyebrow">Philosophy</p>
+            <h2 class="final-heading">
+              Designing systems<br />
+              with <em>clarity</em><br />
+              and <em>presence.</em>
+            </h2>
+            <p class="lede">
+              Every detail serves a purpose. Every motion tells a story. We craft digital experiences that feel as considered as the materials they represent.
+            </p>
+          </div>
+          <div class="final-scene-space"></div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer" id="work">
+        <div class="footer-inner">
+          <span>01</span>
+          <strong>Warm Base</strong>
+          <span>Embedded GLB</span>
+          <span class="footer-sep"></span>
+          <span>02</span>
+          <strong>Stone Object</strong>
+          <span>Three.js Motion</span>
+        </div>
       </footer>
-    </main>
+
+    </div>
 
     <script type="module" src="/src/main.js"></script>
   </body>
