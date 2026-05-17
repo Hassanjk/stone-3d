@@ -25,3 +25,11 @@ Thumbs.db
 # Local test artifacts
 verification-*.png
 comparison-reference-current.png
+
+# Generated scroll capture assets
+scroll-*.png
+scroll-cdp-*.png
+scroll-cdp-debug.json
+user-video-contact-sheet.png
+user-video-frames/
+video-reference-frames/

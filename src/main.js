@@ -11,12 +11,12 @@ gsap.registerPlugin(ScrollTrigger);
    LENIS — ultra-smooth scroll physics
    ============================================================ */
 const lenis = new Lenis({
-  duration: 1.4,
+  duration: 1.12,
   easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
   orientation: 'vertical',
   smoothWheel: true,
-  wheelMultiplier: 0.85,
-  touchMultiplier: 1.6,
+  wheelMultiplier: 0.72,
+  touchMultiplier: 1.25,
 });
 
 lenis.on('scroll', ScrollTrigger.update);
@@ -309,11 +309,14 @@ const S = {
   camX: 0.18, camY: 0.46, camZ: 7.55, fov: 35,
   lookY: -0.2,
   // stage
-  stgX: 0.03, stgY: -0.08, stgScale: 1.14,
+  stgX: 1.15, stgY: -0.08, stgScale: 0.98,
   // stone
   stnX: 0.02, stnY: 0.24, stnZ: 0.34,
   stnRX: 0, stnRY: 0, stnRZ: -0.01,
   stnScale: 1,
+  stnScaleX: 1,
+  stnScaleY: 1,
+  stoneOp: 1,
   // base / pedestal
   baseY: -1.62, baseOp: 1,
   // rings
@@ -350,34 +353,37 @@ function setupScrollAnimations() {
   /* ---------- 2. ZOOM INTO STONE ---------- */
   // Camera rushes forward
   gsap.to(S, {
-    camZ: 2.4, camY: 0.28, fov: 48, exposure: 0.55,
-    keyInt: 6.0, copperInt: 5.0,
+    camZ: 4.85, camY: 0.34, fov: 39, exposure: 0.82,
+    stgX: 0.68, stgScale: 1.04,
+    keyInt: 4.4, copperInt: 3.35,
     ease: 'power2.inOut',
-    scrollTrigger: { trigger: '.section--zoom', start: 'top bottom', end: 'bottom bottom', scrub: 1.5 },
+    scrollTrigger: { trigger: '.section--zoom', start: 'top bottom', end: 'bottom bottom', scrub: 1.1 },
   });
 
-  // Stone scales up massively (fills screen)
+  // Stone comes forward without becoming an abstract close-up.
   gsap.to(S, {
-    stnScale: 3.5, stnZ: 2.2,
+    stnScale: 1.72, stnZ: 0.92,
     ease: 'power2.inOut',
-    scrollTrigger: { trigger: '.section--zoom', start: 'top bottom', end: 'bottom bottom', scrub: 1.5 },
+    scrollTrigger: { trigger: '.section--zoom', start: 'top bottom', end: 'bottom bottom', scrub: 1.1 },
   });
 
-  // Base drops away + fades
+  // Base drops away gently but never vanishes into an empty black beat.
   gsap.to(S, {
-    baseOp: 0, baseY: -2.8,
-    ease: 'power3.in',
-    scrollTrigger: { trigger: '.section--zoom', start: 'top bottom', end: '45% bottom', scrub: 1 },
+    baseOp: 0.42, baseY: -2.05,
+    ease: 'power2.inOut',
+    scrollTrigger: { trigger: '.section--zoom', start: 'top bottom', end: '65% bottom', scrub: 1 },
   });
 
   /* ---------- 3. PROJECT 1 — stone moves to background upper-right ---------- */
   gsap.to(S, {
-    camZ: 9.0, camY: 0.5, camX: 0.18, fov: 35,
-    stnScale: 0.72, stnY: 1.1, stnX: 2.4, stnZ: -1.2,
-    ringScale: 0.55, ringOp: 0.5,
+    camZ: 8.2, camY: 0.46, camX: 0.18, fov: 35,
+    stgX: 0.12, stgScale: 1.0,
+    stnScale: 0.82, stnY: 0.76, stnX: 1.58, stnZ: -0.45,
+    ringScale: 0.72, ringOp: 0.62,
+    baseOp: 0.22, baseY: -2.0,
     exposure: 0.82, keyInt: 3.45, copperInt: 2.35,
     ease: 'power3.inOut',
-    scrollTrigger: { trigger: '.section--project', start: 'top bottom', end: 'top 15%', scrub: 1.5 },
+    scrollTrigger: { trigger: '.section--project', start: 'top bottom', end: 'top 18%', scrub: 1.15 },
   });
 
   // Project 1 text — staggered entrance
@@ -442,26 +448,29 @@ function setupScrollAnimations() {
     // Stone Y parallax during horizontal: dips then rises
     gsap.to(S, {
       keyframes: [
-        { stnY: -0.8, duration: 0.5, ease: 'power2.in' },
-        { stnY: 0.7, duration: 0.5, ease: 'power2.out' },
+        { stnY: -0.18, duration: 0.45, ease: 'power2.inOut' },
+        { stnY: 0.48, duration: 0.55, ease: 'power2.out' },
       ],
       scrollTrigger: {
         trigger: hSection,
         start: 'top top',
         end: () => `+=${totalW - window.innerWidth}`,
-        scrub: 1.5,
+        scrub: 1.2,
       },
     });
 
     // Stone X drift — keep stone to the right
     gsap.to(S, {
-      stnX: 1.8,
+      stnX: 1.34,
+      stnScale: 0.8,
+      stnZ: -0.22,
+      stgX: 0.1,
       ease: 'power1.inOut',
       scrollTrigger: {
         trigger: hSection,
         start: 'top top',
         end: () => `+=${totalW - window.innerWidth}`,
-        scrub: 2,
+        scrub: 1.4,
       },
     });
 
@@ -489,28 +498,97 @@ function setupScrollAnimations() {
   }
 
   /* ---------- 5. FINAL SECTION — stone reorients, pedestal returns ---------- */
-  gsap.to(S, {
-    camZ: 7.8, camY: 0.42, camX: 0.18, fov: 35,
-    stnScale: 1.05, stnY: 0.1, stnX: 1.8, stnZ: 0.15,
-    stnRX: 0.35, stnRY: 0.5, stnRZ: -0.45,
-    baseOp: 1, baseY: -1.62,
-    ringScale: 1.0, ringOp: 1.0,
-    ring2Op: 0.9,
-    partOp: 0.95,
-    exposure: 0.9, keyInt: 3.45, copperInt: 2.35,
-    ease: 'power3.inOut',
-    scrollTrigger: { trigger: '.section--final', start: 'top bottom', end: 'top 15%', scrub: 1.5 },
-  });
-
-  // Final text entrance
   const finalText = document.querySelector('[data-animate="final-text"]');
   if (finalText) {
-    gsap.fromTo([...finalText.children], { y: 70, opacity: 0 }, {
-      y: 0, opacity: 1, stagger: 0.1,
-      ease: 'power3.out',
-      scrollTrigger: { trigger: '.section--final', start: 'top 60%', end: 'top 12%', scrub: 1 },
-    });
+    gsap.set([...finalText.children], { y: 70, opacity: 0 });
   }
+
+  const aboutTimeline = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: {
+      trigger: '.section--final',
+      start: 'center center',
+      end: '+=150%',
+      pin: true,
+      scrub: 1,
+    },
+  });
+
+  aboutTimeline
+    .to(S, {
+      camZ: 8.25,
+      camY: 0.42,
+      camX: 0.18,
+      fov: 35,
+      stgX: 2.08,
+      stgScale: 0.94,
+      stnScale: 0.8,
+      stnScaleX: 0.48,
+      stnScaleY: 1.05,
+      stnY: 0.14,
+      stnX: 0.38,
+      stnZ: 0.04,
+      stnRX: -0.24,
+      stnRY: 0.32,
+      stnRZ: -0.18,
+      baseOp: 0.52,
+      baseY: -1.78,
+      ringScale: 0.9,
+      ringOp: 0.58,
+      ring2Op: 0.34,
+      partOp: 0.28,
+      exposure: 0.68,
+      keyInt: 2.7,
+      copperInt: 1.65,
+      duration: 0.42,
+      ease: 'sine.inOut',
+    }, 0)
+    .to(S, {
+      stnScaleX: 1,
+      stnScaleY: 1,
+      stnScale: 0.9,
+      stgX: 2.08,
+      stnX: 0.28,
+      stnRX: 0.06,
+      stnRY: 0.16,
+      stnRZ: -0.12,
+      baseOp: 0.82,
+      baseY: -1.62,
+      ringOp: 0.82,
+      ring2Op: 0.5,
+      partOp: 0.48,
+      exposure: 0.86,
+      keyInt: 3.25,
+      copperInt: 2.1,
+      duration: 0.34,
+      ease: 'sine.in',
+    }, 0.42);
+
+  if (finalText) {
+    aboutTimeline.to([...finalText.children], {
+      y: 0,
+      opacity: 1,
+      stagger: 0.08,
+      duration: 0.2,
+      ease: 'sine.out',
+    }, 0.62);
+  }
+
+  aboutTimeline.to(S, {
+    stoneOp: 0.56,
+    stnScale: 0.88,
+    stgX: 2.08,
+    stnScaleX: 1,
+    stnRX: 0.2,
+    stnRY: -0.04,
+    stnRZ: -0.04,
+    stnX: 0.34,
+    ringOp: 0.36,
+    baseOp: 0.48,
+    exposure: 0.78,
+    duration: 0.24,
+    ease: 'sine.inOut',
+  }, 0.76);
 
   ScrollTrigger.refresh();
 }
@@ -611,7 +689,8 @@ function animate() {
       S.stnRY + smoothPointer.x * 0.018,
       S.stnRZ,
     );
-    stoneModel.scale.setScalar(S.stnScale);
+    stoneModel.scale.set(S.stnScale * S.stnScaleX, S.stnScale * S.stnScaleY, S.stnScale);
+    stoneModel.material.opacity = S.stoneOp;
   }
 
   /* --- Base model --- */

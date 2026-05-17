@@ -158,7 +158,7 @@ h2 em,
    ZOOM SPACER
    =================================================================== */
 .section--zoom {
-  height: 150vh;
+  height: 95vh;
   pointer-events: none;
 }
 
@@ -238,12 +238,12 @@ h2 em,
 
 .project-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 540px;
   aspect-ratio: 16 / 11;
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--glass-border);
-  background: var(--glass);
+  background: rgba(13, 13, 12, 0.72);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   padding: 20px;
@@ -268,22 +268,22 @@ h2 em,
 .card-preview--1 {
   background: linear-gradient(
     135deg,
-    rgba(201, 132, 94, 0.12) 0%,
-    rgba(20, 18, 16, 0.7) 100%
+    rgba(201, 132, 94, 0.2) 0%,
+    rgba(20, 18, 16, 0.82) 100%
   );
 }
 .card-preview--2 {
   background: linear-gradient(
     135deg,
-    rgba(100, 140, 200, 0.12) 0%,
-    rgba(14, 18, 26, 0.7) 100%
+    rgba(100, 140, 200, 0.18) 0%,
+    rgba(14, 18, 26, 0.82) 100%
   );
 }
 .card-preview--3 {
   background: linear-gradient(
     135deg,
-    rgba(140, 200, 100, 0.12) 0%,
-    rgba(14, 26, 18, 0.7) 100%
+    rgba(140, 200, 100, 0.16) 0%,
+    rgba(14, 26, 18, 0.82) 100%
   );
 }
 
@@ -340,7 +340,7 @@ h2 em,
 }
 
 .final-copy {
-  max-width: 620px;
+  max-width: 540px;
 }
 
 .final-heading {
