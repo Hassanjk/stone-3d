@@ -483,28 +483,37 @@ function setupScrollAnimations() {
   const zoomCopy = document.querySelector('[data-animate="zoom-copy"]');
   if (zoomCopy) {
     const zoomCopyItems = [...zoomCopy.children];
-    gsap.set(zoomCopyItems, { y: 28, opacity: 0 });
+    gsap.set(zoomCopy, { y: 42, opacity: 0 });
+    gsap.set(zoomCopyItems, { y: 34, opacity: 0 });
 
     const zoomCopyTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: '.section--zoom',
-        start: '22% center',
-        end: 'bottom top',
+        start: 'top 68%',
+        end: 'bottom bottom',
         scrub: 1,
       },
     });
 
     zoomCopyTimeline
-      .to(zoomCopy, { opacity: 1, y: 0, duration: 0.18, ease: 'sine.out' }, 0)
-      .to(zoomCopyItems, { y: 0, opacity: 1, stagger: 0.04, duration: 0.22, ease: 'sine.out' }, 0.08)
-      .to(zoomCopy, { opacity: 0, y: -36, duration: 0.22, ease: 'sine.inOut' }, 0.72);
+      .to(zoomCopy, { opacity: 1, y: 0, duration: 0.16, ease: 'sine.out' }, 0)
+      .to(zoomCopyItems, { y: 0, opacity: 1, stagger: 0.035, duration: 0.2, ease: 'sine.out' }, 0.04);
+
+    gsap.to(zoomCopy, {
+      opacity: 0,
+      y: -42,
+      immediateRender: false,
+      ease: 'sine.inOut',
+      scrollTrigger: { trigger: '.section--project', start: 'top bottom', end: 'top 62%', scrub: 1 },
+    });
   }
 
   /* ---------- 2. ZOOM INTO STONE ---------- */
   // Camera eases forward without turning the stone into a cropped close-up.
   gsap.to(S, {
-    camZ: 5.75, camY: 0.36, fov: 37, exposure: 0.82,
-    stgX: 0.74, stgScale: 1,
+    camZ: 6.45, camY: 0.4, fov: 35.5, exposure: 0.82,
+    stgX: 1.18, stgScale: 0.92,
+    ringScale: 0.88, ringOp: 0.86,
     keyInt: 4.4, copperInt: 3.35,
     ease: 'power2.inOut',
     scrollTrigger: { trigger: '.section--zoom', start: 'top bottom', end: 'bottom bottom', scrub: 1.1 },
@@ -512,26 +521,26 @@ function setupScrollAnimations() {
 
   // Stone comes forward without becoming an abstract close-up.
   gsap.to(S, {
-    stnScale: 1.16, stnZ: 0.58,
+    stnScale: 0.96, stnZ: 0.36,
     ease: 'power2.inOut',
     scrollTrigger: { trigger: '.section--zoom', start: 'top bottom', end: 'bottom bottom', scrub: 1.1 },
   });
 
   // Base drops away gently but never vanishes into an empty black beat.
   gsap.to(S, {
-    baseOp: 0.42, baseY: -2.05,
+    baseOp: 0.5, baseY: -1.84,
     ease: 'power2.inOut',
     scrollTrigger: { trigger: '.section--zoom', start: 'top bottom', end: '65% bottom', scrub: 1 },
   });
 
   /* ---------- 3. PROJECT 1 — stone moves to background upper-right ---------- */
   gsap.fromTo(S, {
-    camZ: 5.75, camY: 0.36, camX: 0.18, fov: 37,
-    stgX: 0.74, stgScale: 1,
-    stnScale: 1.16, stnY: 0.24, stnX: 0.02, stnZ: 0.58,
+    camZ: 6.45, camY: 0.4, camX: 0.18, fov: 35.5,
+    stgX: 1.18, stgScale: 0.92,
+    stnScale: 0.96, stnY: 0.24, stnX: 0.02, stnZ: 0.36,
     echoOp: 0, echoSpread: 0,
-    ringScale: 1, ringOp: 1,
-    baseOp: 0.42, baseY: -2.05,
+    ringScale: 0.88, ringOp: 0.86,
+    baseOp: 0.5, baseY: -1.84,
     exposure: 0.82, keyInt: 4.4, copperInt: 3.35,
   }, {
     camZ: 8.2, camY: 0.46, camX: 0.18, fov: 35,
