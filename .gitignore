@@ -33,3 +33,7 @@ scroll-cdp-debug.json
 user-video-contact-sheet.png
 user-video-frames/
 video-reference-frames/
+
+# Local video captures
+Video_*.webm
+new-video-frames/

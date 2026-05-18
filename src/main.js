@@ -58,6 +58,9 @@ const softAmber  = new THREE.Color(0xffb27a);
 const ringHaloTex    = createRadialGlowTexture('rgba(214, 118, 75, 0.34)');
 const baseGlowTex   = createRadialGlowTexture('rgba(180, 94, 54, 0.28)');
 const floorShadowTex = createRadialGlowTexture('rgba(0, 0, 0, 0.58)');
+const STONE_WIDTH_BOOST = 1.26;
+const STONE_FRONT_YAW = -0.42;
+const STONE_SPIN_SPEED = 0.28;
 
 scene.add(new THREE.HemisphereLight(0xcac5bc, 0x070504, 1.08));
 
@@ -212,19 +215,6 @@ for (let i = 0; i < 8; i++) {
    ============================================================ */
 const manager = new THREE.LoadingManager();
 const gltfLoader = new GLTFLoader(manager);
-const textureLoader = new THREE.TextureLoader(manager);
-
-function createReferenceStoneLayer() {
-  const tex = textureLoader.load('/assets/stone-reference-cutout.png');
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 8;
-  const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.22, 2.88),
-    new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.02, depthWrite: false, toneMapped: false }),
-  );
-  m.renderOrder = 5;
-  return m;
-}
 
 function createRadialGlowTexture(color) {
   const c = document.createElement('canvas');
@@ -257,6 +247,57 @@ function normalizeModel(obj, { targetHeight, targetWidth }) {
   return wrap;
 }
 
+function normalizeModelCentered(obj, { targetHeight, targetWidth }) {
+  const wrap = new THREE.Group();
+  wrap.add(obj);
+  const box = new THREE.Box3().setFromObject(obj);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  obj.position.sub(center);
+  const basis = targetHeight ? size.y : Math.max(size.x, size.z);
+  wrap.scale.setScalar((targetHeight ?? targetWidth) / basis);
+  return wrap;
+}
+
+function createNeutralStoneTexture(sourceTexture) {
+  const sourceImage = sourceTexture?.image;
+  if (!sourceImage) return sourceTexture ?? null;
+
+  const width = sourceImage.width;
+  const height = sourceImage.height;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(sourceImage, 0, 0, width, height);
+
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const { data } = imageData;
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    const luminance = r * 0.2126 + g * 0.7152 + b * 0.0722;
+    const redDominance = r - Math.max(g, b);
+    const isHotLine = redDominance > 24 && r > 58;
+    const neutral = 3 + luminance * (isHotLine ? 0.025 : 0.2);
+    data[i] = Math.min(235, neutral * 1.03);
+    data[i + 1] = Math.min(235, neutral);
+    data[i + 2] = Math.min(235, neutral * 0.96);
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = sourceTexture.wrapS;
+  texture.wrapT = sourceTexture.wrapT;
+  texture.flipY = sourceTexture.flipY;
+  texture.anisotropy = 8;
+  return texture;
+}
+
 function tuneMaterials(root) {
   root.traverse((n) => {
     if (!n.isMesh) return;
@@ -276,27 +317,80 @@ function tuneMaterials(root) {
   });
 }
 
-function loadModel(url) {
-  return new Promise((res, rej) => gltfLoader.load(url, (g) => { tuneMaterials(g.scene); res(g.scene); }, undefined, rej));
+function tuneStoneMaterials(root) {
+  root.traverse((n) => {
+    if (!n.isMesh) return;
+    n.frustumCulled = false;
+    n.castShadow = n.receiveShadow = false;
+    const originalIsArray = Array.isArray(n.material);
+    const mats = originalIsArray ? n.material : [n.material];
+    const tunedMats = mats.map((mat) => {
+      const stoneMap = createNeutralStoneTexture(mat.map);
+      const tuned = new THREE.MeshPhysicalMaterial({
+        map: stoneMap,
+        normalMap: mat.normalMap ?? null,
+        metalnessMap: mat.metalnessMap ?? null,
+        roughnessMap: mat.roughnessMap ?? null,
+        emissiveMap: null,
+        color: 0x45423e,
+        roughness: 0.46,
+        metalness: 0.02,
+        clearcoat: 0.34,
+        clearcoatRoughness: 0.42,
+        emissive: 0x000000,
+        emissiveIntensity: 0,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 1,
+      });
+      if (tuned.map) tuned.map.colorSpace = THREE.SRGBColorSpace;
+      if (tuned.normalMap && tuned.normalScale) tuned.normalScale.set(0.45, 0.45);
+      return tuned;
+    });
+    n.material = originalIsArray ? tunedMats : tunedMats[0];
+  });
+}
+
+function setModelOpacity(root, opacity) {
+  root.traverse((n) => {
+    if (!n.isMesh) return;
+    const mats = Array.isArray(n.material) ? n.material : [n.material];
+    mats.forEach((mat) => {
+      mat.transparent = true;
+      mat.opacity = opacity;
+    });
+  });
+}
+
+function loadModel(url, tune = tuneMaterials) {
+  return new Promise((res, rej) => gltfLoader.load(url, (g) => { tune(g.scene); res(g.scene); }, undefined, rej));
 }
 
 /* ============================================================
    Create models
    ============================================================ */
 let baseModel = null;
-const stoneModel = createReferenceStoneLayer();
-stoneModel.position.set(0.02, 0.24, 0.34);
-stoneModel.rotation.z = -0.01;
-stage.add(stoneModel);
+let stoneModel = null;
 
-loadModel('/assets/base.glb')
+const baseLoad = loadModel('/assets/base.glb')
   .then((base) => {
     baseModel = normalizeModel(base, { targetWidth: 2.95 });
     baseModel.scale.y *= 0.58;
     baseModel.position.set(0, -1.62, 0);
     stage.add(baseModel);
   })
-  .catch(console.error)
+  .catch(console.error);
+
+const stoneLoad = loadModel('/assets/stone-web.glb', tuneStoneMaterials)
+  .then((stone) => {
+    stoneModel = normalizeModelCentered(stone, { targetHeight: 2.78 });
+    stoneModel.position.set(0.02, 0.24, 0.34);
+    stoneModel.rotation.z = -0.01;
+    stage.add(stoneModel);
+  })
+  .catch(console.error);
+
+Promise.allSettled([baseLoad, stoneLoad])
   .finally(() => {
     setupScrollAnimations();
   });
@@ -686,11 +780,11 @@ function animate() {
     stoneModel.position.set(S.stnX, S.stnY + Math.sin(t * 1.15) * 0.016, S.stnZ);
     stoneModel.rotation.set(
       S.stnRX + smoothPointer.y * 0.012,
-      S.stnRY + smoothPointer.x * 0.018,
+      S.stnRY + STONE_FRONT_YAW + t * STONE_SPIN_SPEED + smoothPointer.x * 0.018 + Math.sin(t * 0.55) * 0.16,
       S.stnRZ,
     );
-    stoneModel.scale.set(S.stnScale * S.stnScaleX, S.stnScale * S.stnScaleY, S.stnScale);
-    stoneModel.material.opacity = S.stoneOp;
+    stoneModel.scale.set(S.stnScale * S.stnScaleX * STONE_WIDTH_BOOST, S.stnScale * S.stnScaleY, S.stnScale);
+    setModelOpacity(stoneModel, S.stoneOp);
   }
 
   /* --- Base model --- */
