@@ -58,9 +58,13 @@ const softAmber  = new THREE.Color(0xffb27a);
 const ringHaloTex    = createRadialGlowTexture('rgba(214, 118, 75, 0.34)');
 const baseGlowTex   = createRadialGlowTexture('rgba(180, 94, 54, 0.28)');
 const floorShadowTex = createRadialGlowTexture('rgba(0, 0, 0, 0.58)');
-const STONE_WIDTH_BOOST = 1.26;
+const STONE_WIDTH_BOOST = 1.18;
 const STONE_FRONT_YAW = -0.42;
 const STONE_SPIN_SPEED = 0.28;
+const STONE_ECHOES = [
+  { x: -0.72, y: 0.04, z: -0.22, scale: 0.76, ry: -0.34, rz: 0.08, opacity: 0.4, spin: -0.08 },
+  { x: -1.28, y: -0.14, z: -0.46, scale: 0.55, ry: -0.62, rz: -0.06, opacity: 0.24, spin: 0.12 },
+];
 
 scene.add(new THREE.HemisphereLight(0xcac5bc, 0x070504, 1.08));
 
@@ -362,6 +366,33 @@ function setModelOpacity(root, opacity) {
   });
 }
 
+function createStoneEcho(source) {
+  const echo = source.clone(true);
+  const copperTint = new THREE.Color(0xff8a42);
+
+  echo.traverse((n) => {
+    if (!n.isMesh) return;
+    const originalIsArray = Array.isArray(n.material);
+    const mats = originalIsArray ? n.material : [n.material];
+    const echoMats = mats.map((mat) => {
+      const echoMat = mat.clone();
+      echoMat.transparent = true;
+      echoMat.depthWrite = false;
+      echoMat.opacity = 0;
+      if (echoMat.color) echoMat.color.lerp(copperTint, 0.12);
+      if (echoMat.emissive) {
+        echoMat.emissive.set(0x2a1208);
+        echoMat.emissiveIntensity = 0.16;
+      }
+      return echoMat;
+    });
+    n.material = originalIsArray ? echoMats : echoMats[0];
+  });
+
+  echo.visible = false;
+  return echo;
+}
+
 function loadModel(url, tune = tuneMaterials) {
   return new Promise((res, rej) => gltfLoader.load(url, (g) => { tune(g.scene); res(g.scene); }, undefined, rej));
 }
@@ -371,6 +402,7 @@ function loadModel(url, tune = tuneMaterials) {
    ============================================================ */
 let baseModel = null;
 let stoneModel = null;
+let stoneEchoes = [];
 
 const baseLoad = loadModel('/assets/base.glb')
   .then((base) => {
@@ -386,6 +418,8 @@ const stoneLoad = loadModel('/assets/stone-web.glb', tuneStoneMaterials)
     stoneModel = normalizeModelCentered(stone, { targetHeight: 2.78 });
     stoneModel.position.set(0.02, 0.24, 0.34);
     stoneModel.rotation.z = -0.01;
+    stoneEchoes = STONE_ECHOES.map(() => createStoneEcho(stoneModel));
+    stoneEchoes.forEach((echo) => stage.add(echo));
     stage.add(stoneModel);
   })
   .catch(console.error);
@@ -407,10 +441,12 @@ const S = {
   // stone
   stnX: 0.02, stnY: 0.24, stnZ: 0.34,
   stnRX: 0, stnRY: 0, stnRZ: -0.01,
-  stnScale: 1,
+  stnScale: 0.84,
   stnScaleX: 1,
   stnScaleY: 1,
   stoneOp: 1,
+  echoOp: 0,
+  echoSpread: 0,
   // base / pedestal
   baseY: -1.62, baseOp: 1,
   // rings
@@ -444,11 +480,31 @@ function setupScrollAnimations() {
     scrollTrigger: { trigger: '.section--hero', start: 'top top', end: '35% top', scrub: 1 },
   });
 
+  const zoomCopy = document.querySelector('[data-animate="zoom-copy"]');
+  if (zoomCopy) {
+    const zoomCopyItems = [...zoomCopy.children];
+    gsap.set(zoomCopyItems, { y: 28, opacity: 0 });
+
+    const zoomCopyTimeline = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.section--zoom',
+        start: '22% center',
+        end: 'bottom top',
+        scrub: 1,
+      },
+    });
+
+    zoomCopyTimeline
+      .to(zoomCopy, { opacity: 1, y: 0, duration: 0.18, ease: 'sine.out' }, 0)
+      .to(zoomCopyItems, { y: 0, opacity: 1, stagger: 0.04, duration: 0.22, ease: 'sine.out' }, 0.08)
+      .to(zoomCopy, { opacity: 0, y: -36, duration: 0.22, ease: 'sine.inOut' }, 0.72);
+  }
+
   /* ---------- 2. ZOOM INTO STONE ---------- */
-  // Camera rushes forward
+  // Camera eases forward without turning the stone into a cropped close-up.
   gsap.to(S, {
-    camZ: 4.85, camY: 0.34, fov: 39, exposure: 0.82,
-    stgX: 0.68, stgScale: 1.04,
+    camZ: 5.75, camY: 0.36, fov: 37, exposure: 0.82,
+    stgX: 0.74, stgScale: 1,
     keyInt: 4.4, copperInt: 3.35,
     ease: 'power2.inOut',
     scrollTrigger: { trigger: '.section--zoom', start: 'top bottom', end: 'bottom bottom', scrub: 1.1 },
@@ -456,7 +512,7 @@ function setupScrollAnimations() {
 
   // Stone comes forward without becoming an abstract close-up.
   gsap.to(S, {
-    stnScale: 1.72, stnZ: 0.92,
+    stnScale: 1.16, stnZ: 0.58,
     ease: 'power2.inOut',
     scrollTrigger: { trigger: '.section--zoom', start: 'top bottom', end: 'bottom bottom', scrub: 1.1 },
   });
@@ -469,14 +525,32 @@ function setupScrollAnimations() {
   });
 
   /* ---------- 3. PROJECT 1 — stone moves to background upper-right ---------- */
-  gsap.to(S, {
+  gsap.fromTo(S, {
+    camZ: 5.75, camY: 0.36, camX: 0.18, fov: 37,
+    stgX: 0.74, stgScale: 1,
+    stnScale: 1.16, stnY: 0.24, stnX: 0.02, stnZ: 0.58,
+    echoOp: 0, echoSpread: 0,
+    ringScale: 1, ringOp: 1,
+    baseOp: 0.42, baseY: -2.05,
+    exposure: 0.82, keyInt: 4.4, copperInt: 3.35,
+  }, {
     camZ: 8.2, camY: 0.46, camX: 0.18, fov: 35,
     stgX: 0.12, stgScale: 1.0,
     stnScale: 0.82, stnY: 0.76, stnX: 1.58, stnZ: -0.45,
+    echoSpread: 1,
     ringScale: 0.72, ringOp: 0.62,
     baseOp: 0.22, baseY: -2.0,
     exposure: 0.82, keyInt: 3.45, copperInt: 2.35,
+    immediateRender: false,
     ease: 'power3.inOut',
+    scrollTrigger: { trigger: '.section--project', start: 'top bottom', end: 'top 18%', scrub: 1.15 },
+  });
+
+  gsap.to(S, {
+    keyframes: [
+      { echoOp: 0.34, duration: 0.38, ease: 'sine.out' },
+      { echoOp: 0, duration: 0.62, ease: 'sine.inOut' },
+    ],
     scrollTrigger: { trigger: '.section--project', start: 'top bottom', end: 'top 18%', scrub: 1.15 },
   });
 
@@ -777,11 +851,37 @@ function animate() {
 
   /* --- Stone --- */
   if (stoneModel) {
-    stoneModel.position.set(S.stnX, S.stnY + Math.sin(t * 1.15) * 0.016, S.stnZ);
+    const stoneFloatY = Math.sin(t * 1.15) * 0.016;
+    const stoneRotX = S.stnRX + smoothPointer.y * 0.012;
+    const stoneRotY = S.stnRY + STONE_FRONT_YAW + t * STONE_SPIN_SPEED + smoothPointer.x * 0.018 + Math.sin(t * 0.55) * 0.16;
+    const stoneRotZ = S.stnRZ;
+
+    stoneEchoes.forEach((echo, i) => {
+      const cfg = STONE_ECHOES[i];
+      const opacity = S.echoOp * cfg.opacity;
+      const spread = S.echoSpread;
+      const echoScale = S.stnScale * cfg.scale * (1 - spread * 0.06);
+
+      echo.visible = opacity > 0.01;
+      echo.position.set(
+        S.stnX + cfg.x * spread,
+        S.stnY + stoneFloatY + cfg.y * spread,
+        S.stnZ + cfg.z * spread,
+      );
+      echo.rotation.set(
+        stoneRotX,
+        stoneRotY + cfg.ry * spread + t * cfg.spin,
+        stoneRotZ + cfg.rz * spread,
+      );
+      echo.scale.set(echoScale * S.stnScaleX * STONE_WIDTH_BOOST, echoScale * S.stnScaleY, echoScale);
+      setModelOpacity(echo, opacity);
+    });
+
+    stoneModel.position.set(S.stnX, S.stnY + stoneFloatY, S.stnZ);
     stoneModel.rotation.set(
-      S.stnRX + smoothPointer.y * 0.012,
-      S.stnRY + STONE_FRONT_YAW + t * STONE_SPIN_SPEED + smoothPointer.x * 0.018 + Math.sin(t * 0.55) * 0.16,
-      S.stnRZ,
+      stoneRotX,
+      stoneRotY,
+      stoneRotZ,
     );
     stoneModel.scale.set(S.stnScale * S.stnScaleX * STONE_WIDTH_BOOST, S.stnScale * S.stnScaleY, S.stnScale);
     setModelOpacity(stoneModel, S.stoneOp);
