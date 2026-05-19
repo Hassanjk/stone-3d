@@ -1,5 +1,5 @@
 /* ===================================================================
-   OBSIDIAN RESONANCE — Scroll-Driven 3D Experience
+   OBSIDIAN RESONANCE — Scroll-Driven 3D Experienced
    =================================================================== */
 
 /* --- Reset & Variables --- */
@@ -29,7 +29,8 @@
 }
 
 html {
-  scroll-behavior: auto; /* Lenis handles smoothing */
+  scroll-behavior: auto;
+  /* Lenis handles smoothing */
 }
 
 html,
@@ -62,7 +63,8 @@ a {
 #scroll-container {
   position: relative;
   z-index: 2;
-  pointer-events: none; /* let pointer events fall through to body for 3D */
+  pointer-events: none;
+  /* let pointer events fall through to body for 3D */
 }
 
 #scroll-container * {
@@ -100,6 +102,7 @@ a {
 .nav a {
   transition: color 200ms ease;
 }
+
 .nav a:hover {
   color: var(--copper-hot);
 }
@@ -266,25 +269,21 @@ h2 em,
 }
 
 .card-preview--1 {
-  background: linear-gradient(
-    135deg,
-    rgba(201, 132, 94, 0.2) 0%,
-    rgba(20, 18, 16, 0.82) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(201, 132, 94, 0.2) 0%,
+      rgba(20, 18, 16, 0.82) 100%);
 }
+
 .card-preview--2 {
-  background: linear-gradient(
-    135deg,
-    rgba(100, 140, 200, 0.18) 0%,
-    rgba(14, 18, 26, 0.82) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(100, 140, 200, 0.18) 0%,
+      rgba(14, 18, 26, 0.82) 100%);
 }
+
 .card-preview--3 {
-  background: linear-gradient(
-    135deg,
-    rgba(140, 200, 100, 0.16) 0%,
-    rgba(14, 26, 18, 0.82) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(140, 200, 100, 0.16) 0%,
+      rgba(14, 26, 18, 0.82) 100%);
 }
 
 /* ===================================================================
@@ -391,32 +390,40 @@ h2 em,
   .section--hero {
     padding: 28px 6% 0;
   }
+
   .nav {
     gap: 22px;
     font-size: 13px;
   }
+
   .hero-layout {
     grid-template-columns: 1fr;
     min-height: auto;
     padding-top: 60px;
   }
+
   .hero-scene-space {
     display: none;
   }
+
   h1 {
     font-size: 56px;
   }
+
   .project-layout,
   .final-layout {
     grid-template-columns: 1fr;
   }
+
   .hscroll-panel {
     grid-template-columns: 1fr;
     padding: 0 6%;
   }
+
   .project-name {
     font-size: 42px;
   }
+
   .final-heading {
     font-size: 46px;
   }
@@ -426,6 +433,7 @@ h2 em,
   .section--hero {
     padding: 22px 20px 0;
   }
+
   .nav {
     width: 100%;
     justify-content: flex-start;
@@ -433,29 +441,36 @@ h2 em,
     gap: 10px 16px;
     font-size: 11px;
   }
+
   .eyebrow {
     font-size: 13px;
     margin-bottom: 16px;
   }
+
   h1 {
     font-size: 42px;
   }
+
   .lede {
     font-size: 16px;
     line-height: 1.45;
     margin-top: 22px;
     max-width: 320px;
   }
+
   .section--project,
   .section--final {
     padding: 60px 20px;
   }
+
   .hscroll-panel {
     padding: 0 20px;
   }
+
   .footer {
     padding: 0 20px;
   }
+
   .footer-inner {
     flex-wrap: wrap;
     font-size: 14px;
