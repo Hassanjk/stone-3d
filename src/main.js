@@ -504,7 +504,7 @@ function setupScrollAnimations() {
       y: -42,
       immediateRender: false,
       ease: 'sine.inOut',
-      scrollTrigger: { trigger: '.section--project', start: 'top bottom', end: 'top 62%', scrub: 1 },
+      scrollTrigger: { trigger: '.section--hscroll', start: 'top bottom', end: 'top 62%', scrub: 1 },
     });
   }
 
@@ -552,7 +552,7 @@ function setupScrollAnimations() {
     exposure: 0.82, keyInt: 3.45, copperInt: 2.35,
     immediateRender: false,
     ease: 'power3.inOut',
-    scrollTrigger: { trigger: '.section--project', start: 'top bottom', end: 'top 18%', scrub: 1.15 },
+    scrollTrigger: { trigger: '.section--hscroll', start: 'top bottom', end: 'top top', scrub: 1.15 },
   });
 
   gsap.to(S, {
@@ -560,46 +560,10 @@ function setupScrollAnimations() {
       { echoOp: 0.34, duration: 0.38, ease: 'sine.out' },
       { echoOp: 0, duration: 0.62, ease: 'sine.inOut' },
     ],
-    scrollTrigger: { trigger: '.section--project', start: 'top bottom', end: 'top 18%', scrub: 1.15 },
+    scrollTrigger: { trigger: '.section--hscroll', start: 'top bottom', end: 'top top', scrub: 1.15 },
   });
 
-  // Project 1 text — staggered entrance
-  const p1Text = document.querySelector('[data-animate="project1-text"]');
-  if (p1Text) {
-    gsap.fromTo([...p1Text.children], { y: 55, opacity: 0 }, {
-      y: 0, opacity: 1, stagger: 0.08,
-      ease: 'power3.out',
-      scrollTrigger: { trigger: '.section--project', start: 'top 65%', end: 'top 18%', scrub: 1 },
-    });
-  }
-
-  // Project 1 card — slide up
-  const p1Card = document.querySelector('[data-animate="project1-card"]');
-  if (p1Card) {
-    gsap.fromTo(p1Card, { y: 180, opacity: 0, scale: 0.92 }, {
-      y: 0, opacity: 1, scale: 1,
-      ease: 'power3.out',
-      scrollTrigger: { trigger: '.section--project', start: 'top 72%', end: 'top 18%', scrub: 1 },
-    });
-  }
-
-  // Project 1 exit
-  if (p1Text) {
-    gsap.to(p1Text, {
-      y: -90, opacity: 0,
-      ease: 'power2.in',
-      scrollTrigger: { trigger: '.section--project', start: 'bottom 90%', end: 'bottom 30%', scrub: 1 },
-    });
-  }
-  if (p1Card) {
-    gsap.to(p1Card, {
-      y: -70, opacity: 0,
-      ease: 'power2.in',
-      scrollTrigger: { trigger: '.section--project', start: 'bottom 90%', end: 'bottom 30%', scrub: 1 },
-    });
-  }
-
-  /* ---------- 4. HORIZONTAL SCROLL ---------- */
+  /* ---------- 3. HORIZONTAL SCROLL ---------- */
   const hSection = document.querySelector('.section--hscroll');
   const hTrack   = document.querySelector('.hscroll-track');
   if (hSection && hTrack) {
@@ -622,12 +586,33 @@ function setupScrollAnimations() {
       },
     });
 
+    const firstPanel = panels[0];
+    const firstInfo = firstPanel?.querySelector('.hscroll-panel-info');
+    const firstCard = firstPanel?.querySelector('.hscroll-panel-card');
+    if (firstInfo) {
+      gsap.fromTo([...firstInfo.children], { y: 55, opacity: 0 }, {
+        y: 0, opacity: 1, stagger: 0.08,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: hSection, start: 'top 65%', end: 'top 18%', scrub: 1 },
+      });
+    }
+    if (firstCard) {
+      gsap.fromTo(firstCard, { y: 160, opacity: 0, scale: 0.92 }, {
+        y: 0, opacity: 1, scale: 1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: hSection, start: 'top 72%', end: 'top 18%', scrub: 1 },
+      });
+    }
+
     // Stone Y parallax during horizontal: dips then rises
-    gsap.to(S, {
+    gsap.fromTo(S, {
+      stnY: 0.76,
+    }, {
       keyframes: [
-        { stnY: -0.18, duration: 0.45, ease: 'power2.inOut' },
+        { stnY: 0.54, duration: 0.45, ease: 'power2.inOut' },
         { stnY: 0.48, duration: 0.55, ease: 'power2.out' },
       ],
+      immediateRender: false,
       scrollTrigger: {
         trigger: hSection,
         start: 'top top',
@@ -637,11 +622,17 @@ function setupScrollAnimations() {
     });
 
     // Stone X drift — keep stone to the right
-    gsap.to(S, {
+    gsap.fromTo(S, {
+      stnX: 1.58,
+      stnScale: 0.82,
+      stnZ: -0.45,
+      stgX: 0.12,
+    }, {
       stnX: 1.34,
       stnScale: 0.8,
       stnZ: -0.22,
       stgX: 0.1,
+      immediateRender: false,
       ease: 'power1.inOut',
       scrollTrigger: {
         trigger: hSection,
